@@ -31,7 +31,6 @@ const matchesPattern = (str) => {
 }
 
 const isUSD = (str) => {
-  // TODO: split into regex parts
   const result = `${str}`.match(/^\$(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$/);
   return !!result;
 }
