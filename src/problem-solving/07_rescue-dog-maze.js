@@ -19,3 +19,50 @@
  *
  * See the test if you have questions.
  */
+
+
+// TODO: at the mmoment finds the paths if only one valid path available
+const rescuePrincessPath = (config) => {
+  const { rows, columns, startPosition, maze } = config;
+
+  const scores = [];
+  let counter = 0;
+  for (let i = 0; i < rows; i++) {
+    let cols = [];
+    for (let j = 0; j < columns; j++) {
+       cols.push(counter);
+       counter++;
+    }
+    scores.push(cols);
+  }
+
+  const traverse = (maze, i, j, paths) => {
+    if (i < 0 || j < 0 || i >= rows || j >= columns || (maze[i][j] !== ' ' && maze[i][j] !== 'd')) {
+      return;
+    }
+
+    if (maze[i][j] === 'd') {
+      paths.push({ i, j, last: true }); // mark last point
+      return;
+    }
+
+    maze[i][j] = '#'; // marked as passed
+    paths.push({ i, j, last: false }); // save path
+    traverse(maze, i + 1, j, paths);
+    traverse(maze, i - 1, j, paths);
+    traverse(maze, i, j + 1, paths);
+    traverse(maze, i, j - 1, paths);
+  }
+  const paths = [];
+  traverse(maze, 0, startPosition, paths);
+
+  return paths.reduce((path, point) => {
+    path.push(scores[point.i][point.j]);
+    return path;
+  }, []);
+
+}
+
+export {
+  rescuePrincessPath,
+}
