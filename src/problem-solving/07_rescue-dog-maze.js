@@ -56,11 +56,13 @@ const rescuePrincessPath = (config) => {
   const paths = [];
   traverse(maze, 0, startPosition, paths);
 
-  return paths.reduce((path, point) => {
-    path.push(scores[point.i][point.j]);
-    return path;
-  }, []);
-
+  if (paths[paths.length - 1].last) {
+    return paths.reduce((path, point) => {
+      path.push(scores[point.i][point.j]);
+      return path;
+    }, []);
+  }
+  return;
 }
 
 export {
