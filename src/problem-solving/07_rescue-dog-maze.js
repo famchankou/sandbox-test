@@ -19,50 +19,60 @@
  *
  * See the test if you have questions.
  */
-
-
-// TODO: at the mmoment finds the paths if only one valid path available
 const rescuePrincessPath = (config) => {
   const { rows, columns, startPosition, maze } = config;
 
-  const scores = [];
-  let counter = 0;
-  for (let i = 0; i < rows; i++) {
-    let cols = [];
-    for (let j = 0; j < columns; j++) {
-       cols.push(counter);
-       counter++;
-    }
-    scores.push(cols);
+  let minDist = Infinity, counter = 0, result = [], intraverse = [];
+  const scores = Array.from({ length: rows }, _ => Array.from({ length: columns }, _ => counter++));
+  const visited = Array.from({ length: rows }, _ => new Array(columns).fill(0));
+  
+  const isValid = (x, y) => x < rows && y < columns && x >= 0 && y >= 0;
+  const isSafe = (x, y) => !(maze[x][y] === '#' || visited[x][y]);
+
+  const source = { x: 0, y: maze[0].findIndex(z => z === ' ') };
+  const dest = { x: rows - 1, y: maze[rows - 1].findIndex(d => d === 'd') };
+
+  if (dest.y < 0) {
+    return;
   }
 
-  const traverse = (maze, i, j, paths) => {
-    if (i < 0 || j < 0 || i >= rows || j >= columns || (maze[i][j] !== ' ' && maze[i][j] !== 'd')) {
+  const traverseShortest = (startX, startY, dist) => {
+    const distNext = dist + 1;
+    if (startX === dest.x && startY === dest.y) {
+      if (distNext < minDist) {
+        minDist = distNext;
+        intraverse.push(scores[startX][startY]);
+        result = intraverse;
+      }
+      intraverse = [];
       return;
     }
+    visited[startX][startY] = 1;
+    intraverse.push(scores[startX][startY]);
 
-    if (maze[i][j] === 'd') {
-      paths.push({ i, j, last: true }); // mark last point
-      return;
+    const moveUp = startX + 1;
+    if (isValid(moveUp, startY) && isSafe(moveUp, startY)) {
+      traverseShortest(moveUp, startY, distNext);
+    }
+    const moveRight = startY + 1;
+    if (isValid(startX, moveRight) && isSafe(startX, moveRight)) {
+      traverseShortest(startX, moveRight, distNext);
+    }
+    const moveDown = startX - 1;
+    if (isValid(moveDown, startY) && isSafe(moveDown, startY)) {
+      traverseShortest(moveDown, startY, distNext);
+    }
+    const moveLeft = startY - 1;
+    if (isValid(startX, moveLeft) && isSafe(startX, moveLeft)) {
+      traverseShortest(startX, moveLeft, distNext);
     }
 
-    maze[i][j] = '#'; // marked as passed
-    paths.push({ i, j, last: false }); // save path
-    traverse(maze, i + 1, j, paths);
-    traverse(maze, i - 1, j, paths);
-    traverse(maze, i, j + 1, paths);
-    traverse(maze, i, j - 1, paths);
+    visited[startX][startY] = 0;
+    intraverse.pop();
   }
-  const paths = [];
-  traverse(maze, 0, startPosition, paths);
 
-  if (paths[paths.length - 1].last) {
-    return paths.reduce((path, point) => {
-      path.push(scores[point.i][point.j]);
-      return path;
-    }, []);
-  }
-  return;
+  traverseShortest(source.x, source.y, 0);
+  return minDist != Infinity ? result : undefined;
 }
 
 export {
